@@ -31,7 +31,7 @@ const App = () => (
     <AuthProvider>
       <TooltipProvider>
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename="/RWA_Project/">
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

@@ -8,7 +8,8 @@ interface Props {
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: Props) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) return null; // wait for session restore before deciding
   if (!user) return <Navigate to="/login" replace />;
   if (!allowedRoles.includes(user.role)) return <Navigate to="/" replace />;
   return <>{children}</>;

@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { MOCK_USERS } from '@/data/mockData';
-import { User, Role } from '@/data/types';
 
-interface AuthUser {
+// ─── Types ────────────────────────────────────────────────────────────────────
+export type Role = 'resident' | 'admin' | 'collector';
+
+export interface AuthUser {
   id: string;
   name: string;
   email: string;
@@ -13,12 +14,16 @@ interface AuthUser {
 
 interface AuthContextType {
   user: AuthUser | null;
-  login: (email: string, password: string) => boolean;
-  register: (name: string, email: string, password: string, flatNumber: string) => boolean;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string, flatNumber: string) => Promise<boolean>;
   logout: () => void;
-  allUsers: User[];
 }
 
+// ─── API base URL (change to your deployed backend URL in production) ─────────
+const API_URL = 'http://localhost:3001/api';
+
+// ─── Context ──────────────────────────────────────────────────────────────────
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const useAuth = () => {
@@ -27,43 +32,74 @@ export const useAuth = () => {
   return ctx;
 };
 
+// ─── Provider ─────────────────────────────────────────────────────────────────
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [users, setUsers] = useState<User[]>(MOCK_USERS);
+  const [loading, setLoading] = useState(true);
 
+  // Restore session from localStorage on app load
   useEffect(() => {
     const stored = localStorage.getItem('rwa_user');
     if (stored) {
       try { setUser(JSON.parse(stored)); } catch { localStorage.removeItem('rwa_user'); }
     }
+    setLoading(false);
   }, []);
 
-  const login = (email: string, password: string): boolean => {
-    const found = users.find(u => u.email === email && u.password === password);
-    if (!found) return false;
-    const authUser: AuthUser = { id: found.id, name: found.name, email: found.email, role: found.role, flatNumber: found.flatNumber, isRegularPayer: found.isRegularPayer };
-    setUser(authUser);
-    localStorage.setItem('rwa_user', JSON.stringify(authUser));
-    return true;
+  // ─── Login ───────────────────────────────────────────────────────────────
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) return false;
+      const { user: apiUser, token } = await res.json();
+      setUser(apiUser);
+      localStorage.setItem('rwa_user', JSON.stringify(apiUser));
+      localStorage.setItem('rwa_token', token);
+      return true;
+    } catch (err) {
+      console.error('Login failed:', err);
+      return false;
+    }
   };
 
-  const register = (name: string, email: string, password: string, flatNumber: string): boolean => {
-    if (users.some(u => u.email === email)) return false;
-    const newUser: User = { id: String(Date.now()), name, email, password, role: 'resident', flatNumber };
-    setUsers(prev => [...prev, newUser]);
-    const authUser: AuthUser = { id: newUser.id, name, email, role: 'resident', flatNumber };
-    setUser(authUser);
-    localStorage.setItem('rwa_user', JSON.stringify(authUser));
-    return true;
+  // ─── Register ────────────────────────────────────────────────────────────
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    flatNumber: string
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, flatNumber }),
+      });
+      if (!res.ok) return false;
+      const { user: apiUser, token } = await res.json();
+      setUser(apiUser);
+      localStorage.setItem('rwa_user', JSON.stringify(apiUser));
+      localStorage.setItem('rwa_token', token);
+      return true;
+    } catch (err) {
+      console.error('Register failed:', err);
+      return false;
+    }
   };
 
+  // ─── Logout ──────────────────────────────────────────────────────────────
   const logout = () => {
     setUser(null);
     localStorage.removeItem('rwa_user');
+    localStorage.removeItem('rwa_token');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, allUsers: users }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

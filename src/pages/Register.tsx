@@ -30,11 +30,10 @@ const Register = () => {
     e.preventDefault();
     if (password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    const success = register(name, email, password, flat);
+    const success = await register(name, email, password, flat);
     setLoading(false);
     if (success) { toast.success('Account created!'); navigate('/'); }
-    else toast.error('Email already registered');
+    else toast.error('Email already registered or server error');
   };
 
   return (
