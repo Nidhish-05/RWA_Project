@@ -20,8 +20,8 @@ interface AuthContextType {
   logout: () => void;
 }
 
-// ─── API base URL (change to your deployed backend URL in production) ─────────
-const API_URL = 'http://localhost:3001/api';
+// ─── API base URL ─────────────────────────────────────────────────────────────
+const API_URL = 'https://rwa-backend-51n6.onrender.com/api';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 const AuthContext = createContext<AuthContextType | null>(null);
