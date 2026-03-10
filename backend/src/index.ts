@@ -9,13 +9,19 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:8080',
+];
+if (process.env.FRONTEND_URL && process.env.FRONTEND_URL !== '*') {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:8080',
-    'http://localhost:5173', // Vite default
-    'http://localhost:8080', // Your Vite config port
-  ],
-  credentials: true,
+  // If FRONTEND_URL is '*', allow all origins (useful before frontend is deployed)
+  // Once Vercel URL is known, set FRONTEND_URL to exact URL to lock it down
+  origin: process.env.FRONTEND_URL === '*' ? '*' : allowedOrigins,
+  credentials: process.env.FRONTEND_URL !== '*', // credentials can't be used with wildcard
 }));
 
 app.use(express.json());
