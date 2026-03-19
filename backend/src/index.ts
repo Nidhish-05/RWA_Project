@@ -9,19 +9,44 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
-const allowedOrigins = [
+// Helper: strip trailing slash for reliable comparison
+const normalise = (s: string) => s.trim().replace(/\/$/, '');
+
+// Build allowed-origins list from env
+const rawFrontendUrl = process.env.FRONTEND_URL || '';
+const isStar = rawFrontendUrl === '*';
+
+// Static localhost origins (always allowed for local dev)
+const localhostOrigins = [
   'http://localhost:5173',
   'http://localhost:8080',
+  'http://localhost:3000',
 ];
-if (process.env.FRONTEND_URL && process.env.FRONTEND_URL !== '*') {
-  allowedOrigins.push(process.env.FRONTEND_URL);
-}
 
 app.use(cors({
-  // If FRONTEND_URL is '*', allow all origins (useful before frontend is deployed)
-  // Once Vercel URL is known, set FRONTEND_URL to exact URL to lock it down
-  origin: process.env.FRONTEND_URL === '*' ? '*' : allowedOrigins,
-  credentials: process.env.FRONTEND_URL !== '*', // credentials can't be used with wildcard
+  origin: isStar
+    ? '*'
+    : (origin, callback) => {
+        // Allow requests with no origin (e.g. curl, Render health checks)
+        if (!origin) return callback(null, true);
+
+        const normOrigin = normalise(origin);
+
+        // Always allow localhost
+        if (localhostOrigins.some(o => normalise(o) === normOrigin)) {
+          return callback(null, true);
+        }
+
+        // Allow the configured FRONTEND_URL (normalised)
+        if (rawFrontendUrl && normalise(rawFrontendUrl) === normOrigin) {
+          return callback(null, true);
+        }
+
+        // Reject and log so Render logs surface mismatches
+        console.warn(`CORS rejected origin: "${origin}" | FRONTEND_URL env: "${rawFrontendUrl}"`);
+        callback(new Error(`CORS: origin "${origin}" not allowed`));
+      },
+  credentials: !isStar,
 }));
 
 app.use(express.json());
@@ -33,6 +58,17 @@ app.use('/api/auth', authRoutes);
 // Health check — useful for Render deployment
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Debug: reveal non-secret config (helps verify Render env vars without exposing secrets)
+app.get('/debug/config', (_req, res) => {
+  res.json({
+    NODE_ENV: process.env.NODE_ENV || '(not set)',
+    FRONTEND_URL: process.env.FRONTEND_URL || '(not set)',
+    DATABASE_URL_SET: !!process.env.DATABASE_URL,
+    JWT_SECRET_SET: !!process.env.JWT_SECRET,
+    PORT: process.env.PORT || '(not set)',
+  });
 });
 
 // 404 handler for unknown routes

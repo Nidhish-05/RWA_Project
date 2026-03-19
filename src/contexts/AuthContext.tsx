@@ -15,8 +15,8 @@ export interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, flatNumber: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (name: string, email: string, password: string, flatNumber: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -47,22 +47,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   // ─── Login ───────────────────────────────────────────────────────────────
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      if (!res.ok) return false;
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        return { success: false, error: data.error || `Server error (${res.status})` };
+      }
       const { user: apiUser, token } = await res.json();
       setUser(apiUser);
       localStorage.setItem('rwa_user', JSON.stringify(apiUser));
       localStorage.setItem('rwa_token', token);
-      return true;
-    } catch (err) {
+      return { success: true };
+    } catch (err: any) {
       console.error('Login failed:', err);
-      return false;
+      return { success: false, error: 'Network error — could not reach server. Check CORS / backend URL.' };
     }
   };
 
@@ -72,22 +75,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     email: string,
     password: string,
     flatNumber: string
-  ): Promise<boolean> => {
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, flatNumber }),
       });
-      if (!res.ok) return false;
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        return { success: false, error: data.error || `Server error (${res.status})` };
+      }
       const { user: apiUser, token } = await res.json();
       setUser(apiUser);
       localStorage.setItem('rwa_user', JSON.stringify(apiUser));
       localStorage.setItem('rwa_token', token);
-      return true;
-    } catch (err) {
+      return { success: true };
+    } catch (err: any) {
       console.error('Register failed:', err);
-      return false;
+      return { success: false, error: 'Network error — could not reach server. Check CORS / backend URL.' };
     }
   };
 

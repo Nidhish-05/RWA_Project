@@ -21,13 +21,13 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const success = await login(email, password);
+    const result = await login(email, password);
     setLoading(false);
-    if (success) {
+    if (result.success) {
       toast.success('Welcome back!');
       navigate('/');
     } else {
-      toast.error('Invalid credentials');
+      toast.error(result.error || 'Invalid credentials');
     }
   };
 
