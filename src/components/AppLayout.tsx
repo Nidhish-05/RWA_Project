@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Building2, CreditCard, FileText, Image, TreePine, AlertTriangle, Users, Wrench, Link2, LogOut, Menu, X } from 'lucide-react';
+import { Building2, CreditCard, FileText, Image, AlertTriangle, Users, Wrench, Link2, LogOut, Menu, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { MOCK_GRIEVANCES } from '@/data/mockData';
+import Footer from '@/components/Footer';
 
 const navItems = {
   admin: [
@@ -14,7 +15,6 @@ const navItems = {
     { path: '/maintenance', label: 'Maintenance', icon: CreditCard },
     { path: '/notices', label: 'Notices', icon: FileText },
     { path: '/gallery', label: 'Gallery', icon: Image },
-    { path: '/park-booking', label: 'Park Booking', icon: TreePine },
     { path: '/grievances', label: 'Grievances', icon: AlertTriangle },
     { path: '/service-people', label: 'Service People', icon: Wrench },
     { path: '/users', label: 'Users', icon: Users },
@@ -25,7 +25,6 @@ const navItems = {
     { path: '/maintenance', label: 'Maintenance', icon: CreditCard },
     { path: '/notices', label: 'Notices', icon: FileText },
     { path: '/gallery', label: 'Gallery', icon: Image },
-    { path: '/park-booking', label: 'Park Booking', icon: TreePine },
     { path: '/grievances', label: 'Grievances', icon: AlertTriangle },
     { path: '/service-people', label: 'Service People', icon: Wrench },
     { path: '/quick-links', label: 'Quick Links', icon: Link2 },
@@ -126,6 +125,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           </h2>
         </header>
         <main className="p-6">{children}</main>
+        <Footer />
       </div>
     </div>
   );

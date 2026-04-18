@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
+import vehicleRoutes from './routes/vehicles';
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
+app.use('/api/vehicles', vehicleRoutes);
 
 // Health check — useful for Render deployment
 app.get('/health', (_req, res) => {

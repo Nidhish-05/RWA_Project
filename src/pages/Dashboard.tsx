@@ -1,8 +1,8 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { Users, CreditCard, AlertTriangle, TreePine, FileText, MessageSquare, CalendarDays } from 'lucide-react';
+import { Users, CreditCard, AlertTriangle, FileText, MessageSquare, Car } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { MONTHLY_COLLECTION, GRIEVANCE_BY_SECTOR, MOCK_USERS, MOCK_PAYMENTS, MOCK_GRIEVANCES, MOCK_PARK_BOOKINGS } from '@/data/mockData';
+import { MONTHLY_COLLECTION, GRIEVANCE_BY_SECTOR, MOCK_USERS, MOCK_PAYMENTS, MOCK_GRIEVANCES } from '@/data/mockData';
 import PageTransition from '@/components/PageTransition';
 import { StaggerList, StaggerItem } from '@/components/StaggerList';
 import { useNavigate } from 'react-router-dom';
@@ -14,20 +14,19 @@ const Dashboard = () => {
   const paidCount = MOCK_PAYMENTS.filter(p => p.status === 'paid').length;
   const collectionRate = Math.round((paidCount / Math.max(totalResidents, 1)) * 100);
   const openGrievances = MOCK_GRIEVANCES.filter(g => g.status === 'open').length;
-  const upcomingBookings = MOCK_PARK_BOOKINGS.length;
 
   const stats = [
     { label: 'Total Residents', value: totalResidents, icon: Users, color: 'from-blue-500 to-cyan-500' },
     { label: 'Collection Rate', value: `${collectionRate}%`, icon: CreditCard, color: 'from-primary to-violet-500' },
     { label: 'Open Grievances', value: openGrievances, icon: AlertTriangle, color: 'from-destructive to-rose-500', pulse: true },
-    { label: 'Upcoming Bookings', value: upcomingBookings, icon: TreePine, color: 'from-accent to-emerald-400' },
+    { label: 'Vehicles Registered', value: '—', icon: Car, color: 'from-accent to-emerald-400' },
   ];
 
   const quickActions = [
     { label: 'Pay Now', icon: CreditCard, path: '/maintenance', color: 'from-primary to-violet-500' },
     { label: 'Raise Complaint', icon: MessageSquare, path: '/grievances', color: 'from-destructive to-rose-500' },
-    { label: 'Book Park', icon: CalendarDays, path: '/park-booking', color: 'from-accent to-emerald-400' },
     { label: 'View Notices', icon: FileText, path: '/notices', color: 'from-blue-500 to-cyan-500' },
+    { label: 'Service People', icon: Car, path: '/service-people', color: 'from-accent to-emerald-400' },
   ];
 
   const recentActivity = [

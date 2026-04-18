@@ -11,7 +11,6 @@ import Dashboard from "@/pages/Dashboard";
 import Maintenance from "@/pages/Maintenance";
 import Notices from "@/pages/Notices";
 import Gallery from "@/pages/Gallery";
-import ParkBooking from "@/pages/ParkBooking";
 import Grievances from "@/pages/Grievances";
 import ServicePeople from "@/pages/ServicePeople";
 import QuickLinks from "@/pages/QuickLinks";
@@ -39,7 +38,6 @@ const App = () => (
             <Route path="/maintenance" element={<ProtectedPage roles={['admin', 'resident', 'collector']}><Maintenance /></ProtectedPage>} />
             <Route path="/notices" element={<ProtectedPage roles={['admin', 'resident']}><Notices /></ProtectedPage>} />
             <Route path="/gallery" element={<ProtectedPage roles={['admin', 'resident']}><Gallery /></ProtectedPage>} />
-            <Route path="/park-booking" element={<ProtectedPage roles={['admin', 'resident']}><ParkBooking /></ProtectedPage>} />
             <Route path="/grievances" element={<ProtectedPage roles={['admin', 'resident']}><Grievances /></ProtectedPage>} />
             <Route path="/service-people" element={<ProtectedPage roles={['admin', 'resident']}><ServicePeople /></ProtectedPage>} />
             <Route path="/quick-links" element={<ProtectedPage roles={['admin', 'resident']}><QuickLinks /></ProtectedPage>} />

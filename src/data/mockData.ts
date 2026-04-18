@@ -1,4 +1,4 @@
-import { User, Payment, OfflineTicket, Notice, GalleryImage, ParkBooking, Grievance, ServicePerson } from './types';
+import { User, Payment, OfflineTicket, Notice, GalleryImage, Grievance, ServicePerson } from './types';
 
 export const DURATION_PRICES: Record<number, number> = { 2: 2000, 4: 4000, 6: 6000, 12: 12000 };
 
@@ -30,9 +30,6 @@ export const MOCK_GALLERY: GalleryImage[] = [
   { id: 'g2', title: 'Garden Maintenance Drive', imageUrl: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600', uploadedBy: 'Rajesh Kumar', uploadedAt: '2026-02-10' },
 ];
 
-export const MOCK_PARK_BOOKINGS: ParkBooking[] = [
-  { id: 'b1', userId: '2', userName: 'Rajesh Kumar', date: '2026-03-20', timeSlot: '4:00 PM - 7:00 PM', gatheringSize: 50, purpose: 'Birthday Party', price: 2000, status: 'pending' },
-];
 
 export const MOCK_GRIEVANCES: Grievance[] = [
   { id: 'gr1', userId: '2', userName: 'Rajesh Kumar', sector: 'roads', description: 'Potholes near Block B entrance need urgent repair.', status: 'open', createdAt: '2026-02-25' },

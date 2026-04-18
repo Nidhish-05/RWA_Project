@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import type { ResidentType, VehicleFormData, TenantDetails } from '@/data/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type Role = 'resident' | 'admin' | 'collector';
@@ -9,14 +10,31 @@ export interface AuthUser {
   email: string;
   role: Role;
   flatNumber: string;
+  floorNumber?: string;
+  phone?: string;
+  alternatePhone?: string;
+  residentType?: ResidentType;
   isRegularPayer?: boolean;
+}
+
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  alternatePhone?: string;
+  flatNumber: string;
+  floorNumber: string;
+  residentType: ResidentType;
+  tenantDetails?: TenantDetails;
+  vehicles: VehicleFormData[];
 }
 
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (name: string, email: string, password: string, flatNumber: string) => Promise<{ success: boolean; error?: string }>;
+  register: (payload: RegisterPayload) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -70,17 +88,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // ─── Register ────────────────────────────────────────────────────────────
-  const register = async (
-    name: string,
-    email: string,
-    password: string,
-    flatNumber: string
-  ): Promise<{ success: boolean; error?: string }> => {
+  const register = async (payload: RegisterPayload): Promise<{ success: boolean; error?: string }> => {
     try {
+      // Strip imageFile from vehicles (can't send File via JSON)
+      const vehiclesPayload = payload.vehicles.map(({ imageFile, ...rest }) => rest);
+
       const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, flatNumber }),
+        body: JSON.stringify({ ...payload, vehicles: vehiclesPayload }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
